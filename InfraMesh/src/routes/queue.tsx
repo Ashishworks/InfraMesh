@@ -45,13 +45,115 @@ function QueuePage() {
             <Field label="retries"><Num v={maxAttempts} on={setMaxAttempts} /></Field>
           </div>
           <button
-            onClick={() => e.enqueue({ queue, payload, priority, delayMs, maxAttempts })}
-            className="w-full rounded-md py-2 text-sm font-medium text-primary-foreground bg-gradient-to-r from-primary to-accent hover:opacity-90 glow-cyan"
-          >PUSH job</button>
+  onClick={() =>
+    e.enqueue({ queue, payload, priority, delayMs, maxAttempts })
+  }
+  className="
+    group relative w-full overflow-hidden
+    rounded-xl border border-white/10
+    bg-white/[0.04]
+    backdrop-blur-xl
+    px-3 py-2
+    text-xs font-medium tracking-wide text-white/90
+    shadow-[0_0_12px_rgba(255,255,255,0.04)]
+    transition-all duration-300
+    hover:border-white/20
+    hover:bg-white/[0.08]
+    hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]
+    hover:text-white
+    active:scale-[0.98]
+  "
+>
+  <span className="relative z-10 flex items-center justify-center gap-1.5">
+    PUSH JOB
+  </span>
+
+  <div
+    className="
+      absolute inset-0 opacity-0
+      bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.12),transparent)]
+      transition duration-700
+      group-hover:opacity-100
+      group-hover:translate-x-full
+      -translate-x-full
+    "
+  />
+</button>
           <div className="grid grid-cols-2 gap-2 pt-2">
-            <button onClick={() => { for (let i=0;i<10;i++) e.enqueue({ queue, payload, priority }); }} className="text-xs rounded-md py-1.5 border border-border/50 hover:border-primary/50">+10 jobs</button>
-            <button onClick={() => e.enqueue({ queue, payload: "{\"will_fail\":true}", maxAttempts: 2 })} className="text-xs rounded-md py-1.5 border border-border/50 hover:border-destructive/50">flaky job</button>
-          </div>
+  <button
+    onClick={() => {
+      for (let i = 0; i < 10; i++) {
+        e.enqueue({ queue, payload, priority });
+      }
+    }}
+    className="
+      group relative overflow-hidden
+      rounded-xl border border-red-500/10
+      bg-red-500/[0.04]
+      backdrop-blur-xl
+      py-1.5
+      text-xs font-medium tracking-wide text-red-100
+      shadow-[0_0_10px_rgba(239,68,68,0.08)]
+      transition-all duration-300
+      hover:border-red-400/20
+      hover:bg-red-500/[0.08]
+      hover:text-white
+      hover:shadow-[0_0_18px_rgba(239,68,68,0.14)]
+      active:scale-[0.98]
+    "
+  >
+    <span className="relative z-10">+10 jobs</span>
+
+    <div
+      className="
+        absolute inset-0 opacity-0
+        bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.08),transparent)]
+        transition duration-700
+        group-hover:opacity-100
+        group-hover:translate-x-full
+        -translate-x-full
+      "
+    />
+  </button>
+
+  <button
+    onClick={() =>
+      e.enqueue({
+        queue,
+        payload: "{\"will_fail\":true}",
+        maxAttempts: 2,
+      })
+    }
+    className="
+      group relative overflow-hidden
+      rounded-xl border border-red-500/10
+      bg-red-500/[0.04]
+      backdrop-blur-xl
+      py-1.5
+      text-xs font-medium tracking-wide text-red-100
+      shadow-[0_0_10px_rgba(239,68,68,0.08)]
+      transition-all duration-300
+      hover:border-red-400/20
+      hover:bg-red-500/[0.08]
+      hover:text-white
+      hover:shadow-[0_0_18px_rgba(239,68,68,0.14)]
+      active:scale-[0.98]
+    "
+  >
+    <span className="relative z-10">flaky job</span>
+
+    <div
+      className="
+        absolute inset-0 opacity-0
+        bg-[linear-gradient(120deg,transparent,rgba(255,255,255,0.08),transparent)]
+        transition duration-700
+        group-hover:opacity-100
+        group-hover:translate-x-full
+        -translate-x-full
+      "
+    />
+  </button>
+</div>
         </div>
 
         <div className="lg:col-span-2 space-y-4">
@@ -76,12 +178,12 @@ function QueuePage() {
           </div>
 
           {queues.map(([qName, jobs]) => (
-            <div key={qName} className="glass p-4">
+            <div key={qName} className="glass p-4 backdrop-blur-xl border border-white/[0.04]">
               <div className="flex items-center justify-between mb-3">
                 <div className="font-mono text-sm grad-text font-semibold">#{qName}</div>
                 <div className="text-[11px] text-muted-foreground">{jobs.length} pending</div>
               </div>
-              <div className="space-y-1 max-h-56 overflow-auto">
+              <div className="space-y-1 max-h-56 overflow-y-auto pr-1 scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
                 {jobs.length === 0 && <div className="text-[11px] text-muted-foreground/60 font-mono">empty</div>}
                 {jobs.slice(0, 30).map((j) => (
                   <div key={j.id} className="flex items-center gap-2 text-[11px] font-mono py-1 border-b border-border/30 last:border-0">
@@ -89,7 +191,7 @@ function QueuePage() {
                     <span className="text-primary truncate flex-1">{j.id}</span>
                     {j.priority > 0 && <span className="text-accent">p{j.priority}</span>}
                     {j.attempts > 0 && <span className="text-warning">×{j.attempts}</span>}
-                    {j.delayUntil && j.delayUntil > Date.now() && <span className="text-muted-foreground">in {Math.round((j.delayUntil-Date.now())/1000)}s</span>}
+                    {j.delayUntil && j.delayUntil > Date.now() && <span className="text-muted-foreground">in {Math.round((j.delayUntil - Date.now()) / 1000)}s</span>}
                   </div>
                 ))}
               </div>
@@ -102,7 +204,7 @@ function QueuePage() {
                 <div className="font-mono text-sm text-destructive font-semibold">Dead Letter Queue</div>
                 <div className="text-[11px] text-muted-foreground">{e.state.dlq.length} jobs</div>
               </div>
-              <div className="space-y-1 max-h-48 overflow-auto">
+              <div className="space-y-1 max-h-48 overflow-y-auto pr-1 scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
                 {e.state.dlq.map((j) => (
                   <div key={j.id} className="flex items-center justify-between gap-2 py-1 text-[11px] font-mono border-b border-border/30 last:border-0">
                     <span className="text-destructive truncate">{j.id}</span>

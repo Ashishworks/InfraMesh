@@ -56,7 +56,10 @@ function CachePage() {
               <Trash2 className="w-3 h-3" /> clear
             </button>
           </div>
-          <div ref={termRef} className="flex-1 overflow-auto p-4 font-mono text-sm space-y-1.5">
+          <div
+  ref={termRef}
+  className="flex-1 overflow-y-auto p-4 font-mono text-sm space-y-1.5 pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20"
+>
             {history.length === 0 && (
               <div className="text-muted-foreground/60">// Try a quick command below ↓</div>
             )}
@@ -113,7 +116,7 @@ function CachePage() {
                   <span>{n.misses} miss</span>
                   <span>{n.evictions} evict</span>
                 </div>
-                <div className="space-y-1 max-h-44 overflow-auto">
+                <div className="space-y-1 max-h-44 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
                   {entries.length === 0 && <div className="text-[11px] text-muted-foreground/60 font-mono">empty</div>}
                   {entries.slice(0, 20).map((en) => {
                     const ttl = en.expiresAt ? Math.max(0, Math.round((en.expiresAt - Date.now()) / 1000)) : null;
@@ -140,7 +143,7 @@ function CachePage() {
               <div key={ch} className="rounded-md border border-border/50 p-3">
                 <div className="font-mono text-sm text-primary mb-1">#{ch}</div>
                 <div className="text-[11px] text-muted-foreground mb-2">{e.state.subscribers.get(ch)?.size ?? 0} subscribers</div>
-                <div className="space-y-1 max-h-32 overflow-auto">
+                <div className="space-y-1 max-h-32 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
                   {msgs.slice(0, 8).map((m, i) => (
                     <div key={i} className="font-mono text-[11px] text-foreground/80">{m}</div>
                   ))}

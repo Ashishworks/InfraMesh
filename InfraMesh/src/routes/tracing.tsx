@@ -22,7 +22,7 @@ function TracingPage() {
     <div className="animate-fade-in">
       <PageHeader title="Request Tracing" subtitle="Distributed trace waterfall for every command flowing through the cluster." />
       <div className="grid lg:grid-cols-[320px_1fr] gap-4">
-        <div className="glass p-0 max-h-[640px] overflow-auto">
+        <div className="glass p-0 max-h-[640px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
           {e.state.traces.map((t) => {
             const sel = (selected ?? e.state.traces[0]?.id) === t.id;
             return (

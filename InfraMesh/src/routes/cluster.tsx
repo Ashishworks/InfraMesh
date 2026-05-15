@@ -23,8 +23,11 @@ function ClusterPage() {
       <PageHeader title="Cluster Topology" subtitle="Sharded primaries with paired replicas. Click a node to simulate failure." />
 
       <div className="grid lg:grid-cols-[2fr_1fr] gap-4">
-        <div className="glass p-4 relative overflow-hidden">
-          <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-[360px]">
+        <div className="glass p-6 relative overflow-visible">
+          <svg
+  viewBox={`-40 -60 ${W + 80} ${H + 120}`}
+  className="w-full h-[420px]"
+>
             <defs>
               <radialGradient id="ring" cx="50%" cy="50%" r="50%">
                 <stop offset="60%" stopColor="oklch(0.82 0.16 200 / 0)" />
@@ -61,7 +64,7 @@ function ClusterPage() {
         <div className="space-y-3">
           <div className="glass p-4">
             <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-2">Shard placement</div>
-            <div className="space-y-1 font-mono text-[11px] max-h-[320px] overflow-auto">
+            <div className="space-y-1 font-mono text-[11px] max-h-[320px] overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
               {samples.map((k) => {
                 const node = e.nodeForKey(k);
                 return (

@@ -47,7 +47,7 @@ function LogsPage() {
             >{lv}</button>
           ))}
         </div>
-        <div className="font-mono text-[12px] max-h-[640px] overflow-auto">
+        <div className="font-mono text-[12px] max-h-[640px] overflow-y-auto scroll-smooth pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
           {filtered.length === 0 && <div className="px-4 py-8 text-center text-muted-foreground/60">no logs match</div>}
           {filtered.map((l) => (
             <div key={l.id} className="grid grid-cols-[88px_60px_120px_1fr] gap-3 px-4 py-1 border-b border-border/20 hover:bg-secondary/20">
