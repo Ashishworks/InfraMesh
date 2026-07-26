@@ -5,6 +5,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
   "assets": {
-    "directory": "./dist/public"
+    "directory": "./.output/public",
+    "binding": "ASSETS"
   }
 }
