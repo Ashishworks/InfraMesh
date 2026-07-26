@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { Sidebar, MobileNav } from "@/components/inframesh/Sidebar";
+import { AppHeader } from "@/components/inframesh/AppHeader";
 
 function NotFoundComponent() {
   return (
@@ -91,6 +92,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
+      {
+        rel: "preconnect",
+        href: "https://fonts.googleapis.com",
+      },
+      {
+        rel: "preconnect",
+        href: "https://fonts.gstatic.com",
+        crossOrigin: "anonymous",
+      },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap",
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -120,9 +134,10 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <div className="relative flex min-h-screen w-full">
         <Sidebar />
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col">
+          <AppHeader />
           <MobileNav />
-          <main className="relative z-[1] mx-auto max-w-[1400px] px-4 md:px-8 py-6">
+          <main className="relative z-[1] flex-1 mx-auto w-full max-w-[1440px] px-4 md:px-8 py-6 md:py-8">
             <Outlet />
           </main>
         </div>

@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEngine } from "@/lib/inframesh/useEngine";
 import { PageHeader } from "@/components/inframesh/PageHeader";
+import { Panel } from "@/components/inframesh/Panel";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, AreaChart, Area } from "recharts";
 
 export const Route = createFileRoute("/metrics")({
@@ -13,6 +14,15 @@ export const Route = createFileRoute("/metrics")({
   component: MetricsPage,
 });
 
+const CHARTS = [
+  { title: "Throughput", unit: "req/s", k: "rps", color: "var(--chart-1)", type: "area" as const },
+  { title: "Latency P95", unit: "ms", k: "p95", color: "var(--chart-2)", type: "area" as const },
+  { title: "Cache hit ratio", unit: "%", k: "hit", color: "var(--chart-3)", type: "line" as const, domain: [0, 100] as [number, number] },
+  { title: "Queue depth", unit: "jobs", k: "q", color: "var(--chart-4)", type: "area" as const },
+  { title: "CPU average", unit: "%", k: "cpu", color: "var(--chart-1)", type: "line" as const, domain: [0, 100] as [number, number] },
+  { title: "Memory", unit: "KB", k: "mem", color: "var(--chart-2)", type: "area" as const },
+];
+
 function MetricsPage() {
   const e = useEngine();
   const data = e.state.metrics.map((s, i) => ({
@@ -23,53 +33,54 @@ function MetricsPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Metrics" subtitle="60-second rolling window aggregated from the gateway, cache and workers." />
-      <div className="grid lg:grid-cols-2 gap-4">
-        <Chart title="Throughput (req/s)" data={data} k="rps" color="var(--cyan)" type="area" />
-        <Chart title="Latency P95 (ms)" data={data} k="p95" color="var(--violet)" type="area" />
-        <Chart title="Cache hit ratio (%)" data={data} k="hit" color="var(--success)" type="line" domain={[0,100]} />
-        <Chart title="Queue depth" data={data} k="q" color="var(--warning)" type="area" />
-        <Chart title="CPU avg (%)" data={data} k="cpu" color="var(--cyan)" type="line" domain={[0,100]} />
-        <Chart title="Memory (KB)" data={data} k="mem" color="var(--violet)" type="area" />
+      <PageHeader
+        title="Metrics"
+        subtitle="60-second rolling window aggregated from gateway, cache, and workers."
+      />
+      <div className="grid gap-4 lg:grid-cols-2">
+        {CHARTS.map((c) => (
+          <Chart key={c.k} {...c} data={data} />
+        ))}
       </div>
     </div>
   );
 }
 
-function Chart({ title, data, k, color, type, domain }: { title: string; data: any[]; k: string; color: string; type: "area" | "line"; domain?: [number, number] }) {
+function Chart({ title, unit, data, k, color, type, domain }: {
+  title: string; unit: string; data: any[]; k: string; color: string;
+  type: "area" | "line"; domain?: [number, number];
+}) {
   return (
-    <div className="glass p-5">
-      <div className="flex justify-between mb-2">
-        <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{title}</div>
-        <div className="text-[10px] font-mono text-muted-foreground">live</div>
+    <Panel title={title} description={unit} noPadding>
+      <div className="px-5 pb-5 pt-1">
+        <div className="h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            {type === "area" ? (
+              <AreaChart data={data} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
+                <defs>
+                  <linearGradient id={`m-${k}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+                    <stop offset="100%" stopColor={color} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="i" hide />
+                <YAxis stroke="var(--chart-axis)" fontSize={10} width={40} domain={domain as any} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ background: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: 8, fontSize: 12 }} />
+                <Area type="monotone" dataKey={k} stroke={color} strokeWidth={2} fill={`url(#m-${k})`} />
+              </AreaChart>
+            ) : (
+              <LineChart data={data} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
+                <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="i" hide />
+                <YAxis stroke="var(--chart-axis)" fontSize={10} width={40} domain={domain as any} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ background: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: 8, fontSize: 12 }} />
+                <Line type="monotone" dataKey={k} stroke={color} strokeWidth={2} dot={false} />
+              </LineChart>
+            )}
+          </ResponsiveContainer>
+        </div>
       </div>
-      <div className="h-48">
-        <ResponsiveContainer width="100%" height="100%">
-          {type === "area" ? (
-            <AreaChart data={data}>
-              <defs>
-                <linearGradient id={`m-${k}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={color} stopOpacity={0.55} />
-                  <stop offset="100%" stopColor={color} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid stroke="oklch(0.4 0.04 275 / 0.2)" strokeDasharray="3 3" />
-              <XAxis dataKey="i" hide />
-              <YAxis stroke="oklch(0.6 0.03 270)" fontSize={10} width={40} domain={domain as any} />
-              <Tooltip contentStyle={{ background: "oklch(0.18 0.035 270)", border: "1px solid oklch(0.4 0.05 275 / 0.6)", borderRadius: 8, fontSize: 12 }} />
-              <Area type="monotone" dataKey={k} stroke={color} strokeWidth={2} fill={`url(#m-${k})`} />
-            </AreaChart>
-          ) : (
-            <LineChart data={data}>
-              <CartesianGrid stroke="oklch(0.4 0.04 275 / 0.2)" strokeDasharray="3 3" />
-              <XAxis dataKey="i" hide />
-              <YAxis stroke="oklch(0.6 0.03 270)" fontSize={10} width={40} domain={domain as any} />
-              <Tooltip contentStyle={{ background: "oklch(0.18 0.035 270)", border: "1px solid oklch(0.4 0.05 275 / 0.6)", borderRadius: 8, fontSize: 12 }} />
-              <Line type="monotone" dataKey={k} stroke={color} strokeWidth={2} dot={false} />
-            </LineChart>
-          )}
-        </ResponsiveContainer>
-      </div>
-    </div>
+    </Panel>
   );
 }

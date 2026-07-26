@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEngine } from "@/lib/inframesh/useEngine";
 import { PageHeader } from "@/components/inframesh/PageHeader";
+import { Panel } from "@/components/inframesh/Panel";
 import { useState, useMemo } from "react";
+import { Search } from "lucide-react";
 
 export const Route = createFileRoute("/logs")({
   head: () => ({
@@ -14,11 +16,12 @@ export const Route = createFileRoute("/logs")({
 });
 
 const LEVELS = ["debug", "info", "warn", "error"] as const;
-const COLOR: Record<string, string> = {
-  debug: "text-muted-foreground",
-  info: "text-primary",
-  warn: "text-warning",
-  error: "text-destructive",
+
+const LEVEL_STYLES: Record<string, { text: string; bg: string; border: string }> = {
+  debug: { text: "text-muted-foreground", bg: "bg-muted/50", border: "border-muted-foreground/30" },
+  info: { text: "text-info", bg: "bg-info/10", border: "border-info/30" },
+  warn: { text: "text-warning", bg: "bg-warning/10", border: "border-warning/30" },
+  error: { text: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" },
 };
 
 function LogsPage() {
@@ -32,33 +35,69 @@ function LogsPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Live Logs" subtitle="Structured logs streamed from every InfraMesh service." />
-      <div className="glass p-0 overflow-hidden">
-        <div className="flex flex-wrap gap-2 items-center px-4 py-3 border-b border-border/50">
-          <input
-            value={q} onChange={(e) => setQ(e.target.value)}
-            placeholder="search messages or service…"
-            className="flex-1 min-w-[200px] bg-input/40 rounded-md px-3 py-1.5 text-sm border border-border/50 outline-none"
-          />
-          {LEVELS.map((lv) => (
-            <button key={lv}
-              onClick={() => setEnabled((s) => { const n = new Set(s); n.has(lv) ? n.delete(lv) : n.add(lv); return n; })}
-              className={`px-2.5 py-1 rounded text-[11px] font-mono uppercase border ${enabled.has(lv) ? `${COLOR[lv]} border-current` : "text-muted-foreground/40 border-border/40"}`}
-            >{lv}</button>
-          ))}
+      <PageHeader
+        title="Live Logs"
+        subtitle="Structured logs streamed from gateway, cache nodes, and workers."
+      />
+
+      <Panel
+        title="Log stream"
+        description={`${filtered.length} entries`}
+        noPadding
+      >
+        <div className="flex flex-wrap items-center gap-2 border-b border-border/40 px-5 py-3">
+          <div className="relative min-w-[220px] flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={q}
+              onChange={(ev) => setQ(ev.target.value)}
+              placeholder="Search messages or service…"
+              className="input-field pl-9 text-sm"
+            />
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {LEVELS.map((lv) => {
+              const on = enabled.has(lv);
+              const s = LEVEL_STYLES[lv];
+              return (
+                <button
+                  key={lv}
+                  onClick={() => setEnabled((prev) => {
+                    const next = new Set(prev);
+                    on ? next.delete(lv) : next.add(lv);
+                    return next;
+                  })}
+                  className={`rounded-md border px-2.5 py-1 text-[11px] font-medium uppercase transition-colors ${
+                    on ? `${s.text} ${s.bg} ${s.border}` : "border-border/40 text-muted-foreground/50"
+                  }`}
+                >
+                  {lv}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="font-mono text-[12px] max-h-[640px] overflow-y-auto scroll-smooth pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
-          {filtered.length === 0 && <div className="px-4 py-8 text-center text-muted-foreground/60">no logs match</div>}
-          {filtered.map((l) => (
-            <div key={l.id} className="grid grid-cols-[88px_60px_120px_1fr] gap-3 px-4 py-1 border-b border-border/20 hover:bg-secondary/20">
-              <span className="text-muted-foreground/70">{new Date(l.ts).toLocaleTimeString()}</span>
-              <span className={`uppercase ${COLOR[l.level]}`}>{l.level}</span>
-              <span className="text-accent truncate">{l.source}</span>
-              <span className="text-foreground/90 truncate">{l.msg}</span>
-            </div>
-          ))}
+
+        <div className="scroll-area max-h-[640px] font-mono text-[12px]">
+          {filtered.length === 0 && (
+            <div className="px-5 py-12 text-center text-sm text-muted-foreground">No logs match your filters</div>
+          )}
+          {filtered.map((l) => {
+            const s = LEVEL_STYLES[l.level];
+            return (
+              <div
+                key={l.id}
+                className="data-table-row grid-cols-[88px_72px_120px_1fr]"
+              >
+                <span className="text-muted-foreground">{new Date(l.ts).toLocaleTimeString()}</span>
+                <span className={`uppercase font-medium ${s.text}`}>{l.level}</span>
+                <span className="truncate text-primary/90">{l.source}</span>
+                <span className="truncate text-foreground/90">{l.msg}</span>
+              </div>
+            );
+          })}
         </div>
-      </div>
+      </Panel>
     </div>
   );
 }

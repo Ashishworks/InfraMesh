@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEngine } from "@/lib/inframesh/useEngine";
 import { PageHeader } from "@/components/inframesh/PageHeader";
+import { Panel } from "@/components/inframesh/Panel";
+import { SectionHeader } from "@/components/inframesh/SectionHeader";
 import { useState, useRef, useEffect } from "react";
 import { Send, Trash2 } from "lucide-react";
 
@@ -46,109 +48,126 @@ function CachePage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Cache Playground" subtitle="A Redis-inspired sharded cache. Commands route via consistent hashing to a primary node and replicate to its replica." />
+      <PageHeader
+        title="Cache Playground"
+        subtitle="Redis-inspired sharded cache. Commands route via consistent hashing to primaries and replicate to replicas."
+      />
 
-      <div className="grid lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 glass p-0 overflow-hidden flex flex-col h-[520px]">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
-            <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Terminal</div>
-            <button onClick={() => setHistory([])} className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-              <Trash2 className="w-3 h-3" /> clear
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Panel
+          title="Command terminal"
+          description="Execute cache commands against the cluster"
+          className="lg:col-span-2 flex flex-col"
+          noPadding
+          actions={
+            <button
+              onClick={() => setHistory([])}
+              className="inline-flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Trash2 className="h-3 w-3" /> Clear
             </button>
-          </div>
-          <div
-  ref={termRef}
-  className="flex-1 overflow-y-auto p-4 font-mono text-sm space-y-1.5 pr-2 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20"
->
+          }
+        >
+          <div ref={termRef} className="scroll-area min-h-[360px] flex-1 space-y-2 p-5 font-mono text-sm">
             {history.length === 0 && (
-              <div className="text-muted-foreground/60">// Try a quick command below ↓</div>
+              <p className="text-muted-foreground/60">Try a quick command below, or pick a hint.</p>
             )}
             {history.map((h, i) => (
               <div key={i}>
                 <div className="text-primary">› {h.cmd}</div>
-                <div className={`pl-3 ${h.ok ? "text-foreground" : "text-destructive"}`}>
+                <div className={`pl-4 ${h.ok ? "text-foreground/90" : "text-destructive"}`}>
                   {h.out}
-                  {h.node && <span className="text-muted-foreground ml-2">[{h.node}]</span>}
+                  {h.node && <span className="ml-2 text-muted-foreground">[{h.node}]</span>}
                 </div>
               </div>
             ))}
           </div>
           <form
             onSubmit={(ev) => { ev.preventDefault(); run(); }}
-            className="flex items-center gap-2 border-t border-border/50 px-3 py-2.5"
+            className="flex items-center gap-2 border-t border-border/40 px-4 py-3"
           >
-            <span className="text-primary font-mono text-sm">›</span>
+            <span className="font-mono text-sm text-primary">›</span>
             <input
-              value={cmd} onChange={(ev) => setCmd(ev.target.value)}
+              value={cmd}
+              onChange={(ev) => setCmd(ev.target.value)}
               placeholder="SET key value [EX seconds]"
-              className="flex-1 bg-transparent outline-none font-mono text-sm placeholder:text-muted-foreground/50"
+              className="flex-1 bg-transparent font-mono text-sm outline-none placeholder:text-muted-foreground/50"
               autoFocus
             />
-            <button type="submit" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md bg-primary/15 text-primary text-xs hover:bg-primary/25">
-              <Send className="w-3 h-3" /> run
+            <button type="submit" className="btn-primary py-1.5 text-xs">
+              <Send className="h-3 w-3" /> Run
             </button>
           </form>
-          <div className="px-3 pb-3 flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 border-t border-border/40 px-4 py-3">
             {HINTS.map((h) => (
-              <button key={h} onClick={() => run(h)} className="text-[10px] font-mono px-2 py-1 rounded border border-border/50 hover:border-primary/60 hover:text-primary">
+              <button
+                key={h}
+                onClick={() => run(h)}
+                className="rounded border border-border/50 px-2 py-1 font-mono text-[10px] transition-colors hover:border-primary/40 hover:text-primary"
+              >
                 {h}
               </button>
             ))}
           </div>
-        </div>
+        </Panel>
 
         <div className="space-y-4">
+          <SectionHeader title="Primary shards" description="Live key distribution" />
           {primaries.map((n) => {
             const replica = e.state.nodes.find((x) => x.role === "replica" && x.primaryOf === n.id);
             const entries = Array.from(n.store.values());
             return (
-              <div key={n.id} className="glass p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="font-mono text-sm">
-                    <span className="grad-text font-semibold">{n.id}</span>
-                    <span className="text-muted-foreground ml-2">→ {replica?.id ?? "no replica"}</span>
-                  </div>
-                  <span className={`h-2 w-2 rounded-full ${n.alive ? "bg-success pulse-dot" : "bg-destructive"}`} />
-                </div>
-                <div className="text-[11px] text-muted-foreground flex gap-3 mb-2">
-                  <span>{entries.length} keys</span>
-                  <span>{n.hits} hit</span>
-                  <span>{n.misses} miss</span>
-                  <span>{n.evictions} evict</span>
-                </div>
-                <div className="space-y-1 max-h-44 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
-                  {entries.length === 0 && <div className="text-[11px] text-muted-foreground/60 font-mono">empty</div>}
-                  {entries.slice(0, 20).map((en) => {
-                    const ttl = en.expiresAt ? Math.max(0, Math.round((en.expiresAt - Date.now()) / 1000)) : null;
-                    return (
-                      <div key={en.key} className="font-mono text-[11px] flex justify-between gap-2 py-1 border-b border-border/30 last:border-0">
-                        <span className="truncate text-primary">{en.key}</span>
-                        <span className="truncate text-muted-foreground">{en.value}</span>
-                        {ttl !== null && <span className="text-warning shrink-0">{ttl}s</span>}
+              <Panel key={n.id} noPadding>
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-mono text-sm font-semibold text-foreground">{n.id}</div>
+                      <div className="mt-0.5 text-xs text-muted-foreground">
+                        Replicates to {replica?.id ?? "none"}
                       </div>
-                    );
-                  })}
+                    </div>
+                    <span className={`status-dot ${n.alive ? "bg-success pulse-dot" : "bg-destructive"}`} />
+                  </div>
+                  <div className="mt-3 flex gap-4 text-[11px] text-muted-foreground">
+                    <span>{entries.length} keys</span>
+                    <span>{n.hits} hits</span>
+                    <span>{n.misses} misses</span>
+                    <span>{n.evictions} evictions</span>
+                  </div>
+                  <div className="scroll-area mt-3 max-h-44 space-y-0">
+                    {entries.length === 0 && (
+                      <p className="py-2 font-mono text-[11px] text-muted-foreground/60">No keys stored</p>
+                    )}
+                    {entries.slice(0, 20).map((en) => {
+                      const ttl = en.expiresAt ? Math.max(0, Math.round((en.expiresAt - Date.now()) / 1000)) : null;
+                      return (
+                        <div key={en.key} className="flex justify-between gap-2 border-b border-border/30 py-1.5 font-mono text-[11px] last:border-0">
+                          <span className="truncate text-primary">{en.key}</span>
+                          <span className="truncate text-muted-foreground">{en.value}</span>
+                          {ttl !== null && <span className="shrink-0 text-warning">{ttl}s</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
+              </Panel>
             );
           })}
         </div>
       </div>
 
       {e.state.channels.size > 0 && (
-        <div className="glass p-4 mt-6">
-          <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground mb-3">Pub / Sub channels</div>
-          <div className="grid md:grid-cols-3 gap-3">
+        <div className="mt-8">
+          <SectionHeader title="Pub / Sub channels" />
+          <div className="grid gap-4 md:grid-cols-3">
             {Array.from(e.state.channels.entries()).map(([ch, msgs]) => (
-              <div key={ch} className="rounded-md border border-border/50 p-3">
-                <div className="font-mono text-sm text-primary mb-1">#{ch}</div>
-                <div className="text-[11px] text-muted-foreground mb-2">{e.state.subscribers.get(ch)?.size ?? 0} subscribers</div>
-                <div className="space-y-1 max-h-32 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
+              <Panel key={ch} title={`#${ch}`} description={`${e.state.subscribers.get(ch)?.size ?? 0} subscribers`} noPadding>
+                <div className="scroll-area max-h-32 px-5 pb-4 space-y-1">
                   {msgs.slice(0, 8).map((m, i) => (
-                    <div key={i} className="font-mono text-[11px] text-foreground/80">{m}</div>
+                    <div key={i} className="font-mono text-[11px] text-foreground/85">{m}</div>
                   ))}
                 </div>
-              </div>
+              </Panel>
             ))}
           </div>
         </div>

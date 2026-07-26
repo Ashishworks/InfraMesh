@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEngine } from "@/lib/inframesh/useEngine";
 import { PageHeader } from "@/components/inframesh/PageHeader";
+import { Panel } from "@/components/inframesh/Panel";
 import { useState } from "react";
 
 export const Route = createFileRoute("/tracing")({
@@ -20,46 +21,73 @@ function TracingPage() {
 
   return (
     <div className="animate-fade-in">
-      <PageHeader title="Request Tracing" subtitle="Distributed trace waterfall for every command flowing through the cluster." />
-      <div className="grid lg:grid-cols-[320px_1fr] gap-4">
-        <div className="glass p-0 max-h-[640px] overflow-y-auto scroll-smooth scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10 hover:scrollbar-thumb-white/20">
-          {e.state.traces.map((t) => {
-            const sel = (selected ?? e.state.traces[0]?.id) === t.id;
-            return (
-              <button key={t.id} onClick={() => setSelected(t.id)}
-                className={`w-full text-left px-4 py-2 border-b border-border/30 text-[11px] font-mono ${sel ? "bg-primary/10" : "hover:bg-secondary/30"}`}>
-                <div className="flex justify-between items-center">
-                  <span className={t.ok ? "text-primary" : "text-destructive"}>{t.path}</span>
-                  <span className="text-muted-foreground">{t.totalMs.toFixed(1)}ms</span>
-                </div>
-                <div className="text-muted-foreground truncate">{new Date(t.ts).toLocaleTimeString()} · {t.id}</div>
-              </button>
-            );
-          })}
-        </div>
-        <div className="glass p-5">
-          {!trace ? <div className="text-muted-foreground text-sm">No traces yet</div> : (
+      <PageHeader
+        title="Request Tracing"
+        subtitle="Distributed trace waterfall for commands flowing through the cluster."
+      />
+      <div className="grid gap-4 lg:grid-cols-[300px_1fr]">
+        <Panel title="Recent traces" description={`${e.state.traces.length} traces`} noPadding>
+          <div className="scroll-area max-h-[640px]">
+            {e.state.traces.length === 0 && (
+              <p className="px-5 py-8 text-sm text-muted-foreground">No traces recorded yet</p>
+            )}
+            {e.state.traces.map((t) => {
+              const sel = (selected ?? e.state.traces[0]?.id) === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setSelected(t.id)}
+                  className={`w-full border-b border-border/30 px-5 py-3 text-left transition-colors last:border-0 ${
+                    sel ? "bg-primary/10" : "hover:bg-secondary/40"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`truncate font-mono text-xs font-medium ${t.ok ? "text-primary" : "text-destructive"}`}>
+                      {t.path}
+                    </span>
+                    <span className="shrink-0 font-mono text-[11px] text-muted-foreground">{t.totalMs.toFixed(1)} ms</span>
+                  </div>
+                  <div className="mt-1 truncate font-mono text-[10px] text-muted-foreground">
+                    {new Date(t.ts).toLocaleTimeString()} · {t.id}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </Panel>
+
+        <Panel title="Trace detail" description={trace ? trace.id : undefined}>
+          {!trace ? (
+            <p className="text-sm text-muted-foreground">Select a trace to view span details</p>
+          ) : (
             <>
-              <div className="flex justify-between items-end mb-4">
+              <div className="mb-6 flex items-end justify-between gap-4">
                 <div>
-                  <div className="font-mono text-sm text-primary">{trace.path}</div>
-                  <div className="text-xs text-muted-foreground font-mono">{trace.id}</div>
+                  <div className="font-mono text-sm font-medium text-primary">{trace.path}</div>
+                  <div className="mt-1 font-mono text-xs text-muted-foreground">{trace.id}</div>
                 </div>
-                <div className="font-mono text-2xl">{trace.totalMs.toFixed(2)}<span className="text-sm text-muted-foreground"> ms</span></div>
+                <div className="font-mono text-2xl font-semibold text-foreground">
+                  {trace.totalMs.toFixed(2)}
+                  <span className="ml-1 text-sm font-normal text-muted-foreground">ms</span>
+                </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {trace.spans.map((s, i) => {
                   const left = trace.totalMs ? (s.start / trace.totalMs) * 100 : 0;
                   const width = trace.totalMs ? Math.max(1, (s.duration / trace.totalMs) * 100) : 0;
                   return (
                     <div key={i}>
-                      <div className="flex justify-between text-[11px] font-mono mb-0.5">
-                        <span className={s.ok ? "text-primary" : "text-destructive"}>{s.service}</span>
-                        <span className="text-muted-foreground">{s.duration.toFixed(2)}ms{s.note ? ` · ${s.note}` : ""}</span>
+                      <div className="mb-1 flex justify-between font-mono text-[11px]">
+                        <span className={s.ok ? "font-medium text-foreground" : "font-medium text-destructive"}>
+                          {s.service}
+                        </span>
+                        <span className="text-muted-foreground">
+                          {s.duration.toFixed(2)} ms{s.note ? ` · ${s.note}` : ""}
+                        </span>
                       </div>
-                      <div className="relative h-4 bg-secondary/30 rounded overflow-hidden">
+                      <div className="relative h-3 overflow-hidden rounded-sm bg-secondary">
                         <div
-                          className={`absolute h-full rounded ${s.ok ? "bg-gradient-to-r from-primary to-accent" : "bg-destructive"}`}
+                          className={`absolute h-full rounded-sm ${s.ok ? "bg-primary" : "bg-destructive"}`}
                           style={{ left: `${left}%`, width: `${width}%` }}
                         />
                       </div>
@@ -69,7 +97,7 @@ function TracingPage() {
               </div>
             </>
           )}
-        </div>
+        </Panel>
       </div>
     </div>
   );

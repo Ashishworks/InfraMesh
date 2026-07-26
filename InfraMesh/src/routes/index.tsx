@@ -2,10 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEngine } from "@/lib/inframesh/useEngine";
 import { StatCard } from "@/components/inframesh/StatCard";
 import { PageHeader } from "@/components/inframesh/PageHeader";
+import { SectionHeader } from "@/components/inframesh/SectionHeader";
+import { Panel } from "@/components/inframesh/Panel";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid,
 } from "recharts";
-import { Activity, Database, Inbox, Network, Cpu, HardDrive, Zap, Workflow } from "lucide-react";
+import { Activity, Database, Inbox, Network, Cpu, HardDrive, Zap, Workflow, RotateCcw } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,60 +37,66 @@ function Overview() {
     <div className="animate-fade-in">
       <PageHeader
         title="Cluster Overview"
-        subtitle="Real-time view of every InfraMesh subsystem."
+        subtitle="Real-time view of every InfraMesh subsystem — throughput, cache, queues, and node health."
         actions={
-          <button onClick={() => e.reset()} className="text-xs px-3 py-2 rounded-md border border-border/60 hover:border-primary/60 hover:text-primary">Reset cluster</button>
+          <button onClick={() => e.reset()} className="btn-outline">
+            <RotateCcw className="h-3.5 w-3.5" />
+            Reset cluster
+          </button>
         }
       />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Requests / sec" value={fmt(last?.rps ?? 0, 1)} sub={`${fmt(totals.req)} total · ${fmt(totals.err)} err`} accent="cyan" icon={<Activity className="w-4 h-4" />} />
-        <StatCard label="Cache hit ratio" value={`${fmt(hitRatio * 100, 1)}%`} sub={`${fmt(totals.cacheHits)} hits / ${fmt(totals.cacheMisses)} miss`} accent="success" icon={<Database className="w-4 h-4" />} />
-        <StatCard label="Queue depth" value={fmt(qDepth)} sub={`${e.state.dlq.length} in DLQ`} accent="violet" icon={<Inbox className="w-4 h-4" />} />
-        <StatCard label="Active nodes" value={`${aliveNodes}/${e.state.nodes.length}`} sub={`${aliveWorkers}/${e.state.workers.length} workers`} accent="warning" icon={<Network className="w-4 h-4" />} />
-        <StatCard label="P95 latency" value={`${fmt(last?.latencyP95 ?? 0, 1)} ms`} accent="cyan" icon={<Zap className="w-4 h-4" />} />
-        <StatCard label="CPU avg" value={`${fmt((last?.cpu ?? 0) * 100, 0)}%`} accent="warning" icon={<Cpu className="w-4 h-4" />} />
-        <StatCard label="Memory" value={`${fmt(memBytes / 1024, 1)} KB`} sub="across primaries" accent="violet" icon={<HardDrive className="w-4 h-4" />} />
-        <StatCard label="Replication" value="HEALTHY" sub={`${e.state.nodes.filter(n => n.role === "replica" && n.alive).length} replicas in sync`} accent="success" icon={<Workflow className="w-4 h-4" />} />
+      <SectionHeader title="Key metrics" description="Live aggregates across the simulated cluster" />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Requests / sec" value={fmt(last?.rps ?? 0, 1)} sub={`${fmt(totals.req)} total · ${fmt(totals.err)} errors`} accent="primary" icon={<Activity className="w-4 h-4" />} />
+        <StatCard label="Cache hit ratio" value={`${fmt(hitRatio * 100, 1)}%`} sub={`${fmt(totals.cacheHits)} hits · ${fmt(totals.cacheMisses)} misses`} accent="success" icon={<Database className="w-4 h-4" />} />
+        <StatCard label="Queue depth" value={fmt(qDepth)} sub={`${e.state.dlq.length} in dead letter queue`} accent="warning" icon={<Inbox className="w-4 h-4" />} />
+        <StatCard label="Active nodes" value={`${aliveNodes}/${e.state.nodes.length}`} sub={`${aliveWorkers}/${e.state.workers.length} workers online`} accent="info" icon={<Network className="w-4 h-4" />} />
+        <StatCard label="P95 latency" value={`${fmt(last?.latencyP95 ?? 0, 1)} ms`} accent="info" icon={<Zap className="w-4 h-4" />} />
+        <StatCard label="CPU average" value={`${fmt((last?.cpu ?? 0) * 100, 0)}%`} accent="warning" icon={<Cpu className="w-4 h-4" />} />
+        <StatCard label="Memory" value={`${fmt(memBytes / 1024, 1)} KB`} sub="Across all primaries" accent="accent" icon={<HardDrive className="w-4 h-4" />} />
+        <StatCard label="Replication" value="Healthy" sub={`${e.state.nodes.filter(n => n.role === "replica" && n.alive).length} replicas in sync`} accent="success" icon={<Workflow className="w-4 h-4" />} />
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-4 mt-6">
-        <ChartCard title="Throughput (req/s)" dataKey="rps" data={chartData} color="var(--cyan)" />
-        <ChartCard title="P95 latency (ms)" dataKey="p95" data={chartData} color="var(--violet)" />
-        <ChartCard title="Cache hit ratio (%)" dataKey="hit" data={chartData} color="var(--success)" />
-        <ChartCard title="Queue depth" dataKey="q" data={chartData} color="var(--warning)" />
+      <div className="mt-8">
+        <SectionHeader title="Performance trends" description="Rolling 60-second window" />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ChartCard title="Throughput" unit="req/s" dataKey="rps" data={chartData} color="var(--chart-1)" />
+          <ChartCard title="P95 latency" unit="ms" dataKey="p95" data={chartData} color="var(--chart-2)" />
+          <ChartCard title="Cache hit ratio" unit="%" dataKey="hit" data={chartData} color="var(--chart-3)" />
+          <ChartCard title="Queue depth" unit="jobs" dataKey="q" data={chartData} color="var(--chart-4)" />
+        </div>
       </div>
     </div>
   );
 }
 
-function ChartCard({ title, data, dataKey, color }: { title: string; data: any[]; dataKey: string; color: string }) {
+function ChartCard({ title, unit, data, dataKey, color }: { title: string; unit: string; data: any[]; dataKey: string; color: string }) {
   return (
-    <div className="glass p-5 relative scanline overflow-hidden">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">{title}</div>
-        <div className="text-[10px] text-muted-foreground font-mono">last 60s</div>
+    <Panel title={title} description={unit} noPadding>
+      <div className="px-5 pb-5 pt-1">
+        <div className="h-48">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 4, right: 4, left: -8, bottom: 0 }}>
+              <defs>
+                <linearGradient id={`g-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+                  <stop offset="100%" stopColor={color} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid stroke="var(--chart-grid)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="i" hide />
+              <YAxis stroke="var(--chart-axis)" fontSize={10} width={36} tickLine={false} axisLine={false} />
+              <Tooltip
+                contentStyle={{ background: "var(--chart-tooltip-bg)", border: "1px solid var(--chart-tooltip-border)", borderRadius: 8, fontSize: 12 }}
+                labelStyle={{ color: "var(--chart-tooltip-label)" }}
+              />
+              <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} fill={`url(#g-${dataKey})`} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
-      <div className="h-44">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data}>
-            <defs>
-              <linearGradient id={`g-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={color} stopOpacity={0.55} />
-                <stop offset="100%" stopColor={color} stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid stroke="oklch(0.4 0.04 275 / 0.2)" strokeDasharray="3 3" />
-            <XAxis dataKey="i" hide />
-            <YAxis stroke="oklch(0.6 0.03 270)" fontSize={10} width={32} />
-            <Tooltip
-              contentStyle={{ background: "oklch(0.18 0.035 270)", border: "1px solid oklch(0.4 0.05 275 / 0.6)", borderRadius: 8, fontSize: 12 }}
-              labelStyle={{ color: "oklch(0.7 0.03 270)" }}
-            />
-            <Area type="monotone" dataKey={dataKey} stroke={color} strokeWidth={2} fill={`url(#g-${dataKey})`} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+    </Panel>
   );
 }
