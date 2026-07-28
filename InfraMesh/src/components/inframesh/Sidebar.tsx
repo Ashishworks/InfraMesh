@@ -65,7 +65,7 @@ export function Sidebar() {
       InfraMesh
     </div>
     <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-500/70">
-      Control Plane
+      Ops Console
     </div>
   </div>
 </Link>
