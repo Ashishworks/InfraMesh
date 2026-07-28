@@ -1,212 +1,294 @@
 # InfraMesh
 
-> Interactive distributed systems and observability playground built with React, TanStack Start, and a custom event-driven in-browser simulation engine.
+> **An interactive distributed systems and observability playground built with React, TanStack Start, and a custom event-driven simulation engine.**
+
+InfraMesh is a browser-based infrastructure simulator that visualizes how modern distributed systems behave internally. Rather than relying on a backend or mocked API responses, the entire infrastructure is simulated in memory using a custom event-driven engine.
+
+The project combines concepts inspired by Redis, Kafka, RabbitMQ, Grafana, Jaeger, and OpenTelemetry into a single interactive platform for learning distributed systems through experimentation.
 
 ---
 
-## Overview
+## ✨ Features
 
-InfraMesh is a realtime infrastructure simulation platform that visualizes how distributed systems behave internally.
+### 🗄️ Distributed Cache Simulation
 
-The project simulates:
+A Redis-inspired distributed cache implementing core caching concepts.
 
-* Redis-style distributed cache clusters
-* Kafka/RabbitMQ-style queue systems
-* Worker orchestration
-* Pub/Sub systems
-* Distributed tracing
-* Metrics pipelines
-* Structured logging
-* Node health monitoring
-* Replication and failover
-* Chaos engineering concepts
+Features include:
 
-All infrastructure behavior is simulated entirely inside the browser using a custom event-driven engine.
-
-InfraMesh is designed as:
-
-* A distributed systems playground
-* An observability learning platform
-* A realtime infrastructure visualization tool
-* A portfolio-grade systems engineering project
-
----
-
-# Features
-
-## Distributed Cache Cluster
-
-Redis-inspired distributed cache simulation featuring:
-
-* Consistent hashing
-* Primary/replica topology
-* Key distribution
-* LRU eviction
-* TTL expiration
-* Cache hit/miss tracking
-* Memory monitoring
-* Pub/Sub channels
-* Replica failover simulation
+- Consistent hashing
+- Primary / Replica topology
+- Automatic key routing
+- Replica synchronization
+- LRU eviction policy
+- TTL expiration
+- Cache hit / miss tracking
+- Memory accounting
+- Pub/Sub messaging
+- Live key visualization
+- Node failure simulation
 
 Supported commands:
 
 ```bash
-SET user:1 alice
+PING
+
+SET user:1 Alice
+SET session:abc token EX 30
+
 GET user:1
 DEL user:1
 EXISTS user:1
-TTL user:1
 KEYS *
-PING
-PUBLISH events hello
+
+PUBLISH events "Hello"
+SUBSCRIBE events
+```
+
+Every command generates:
+
+- Metrics
+- Structured logs
+- Request traces
+- Cache statistics
+- Live UI updates
+
+---
+
+### ⚙️ Queue & Worker Simulation
+
+Kafka/RabbitMQ-inspired asynchronous processing system.
+
+Supports:
+
+- Multiple queues
+- Worker pools
+- Job priorities
+- Delayed jobs
+- Retry mechanism
+- Dead Letter Queue (DLQ)
+- Worker failures
+- Worker recovery
+- Processing visualization
+
+Pipeline:
+
+```text
+Producer
+   │
+   ▼
+ Queue
+   │
+   ▼
+ Worker
+   │
+ ┌─┴──────────────┐
+ │                │
+ ▼                ▼
+Success         Retry
+                   │
+                   ▼
+             Dead Letter Queue
 ```
 
 ---
 
-## Queue & Worker System
+### 📈 Realtime Metrics
 
-Kafka/RabbitMQ-inspired asynchronous queue system.
+Live telemetry generated directly from the simulation engine.
+
+Includes:
+
+- Requests / sec
+- P95 latency
+- Cache hit ratio
+- Queue depth
+- CPU utilization
+- Memory usage
+- Node statistics
+
+Metrics are sampled continuously and visualized using interactive charts.
+
+---
+
+### 📜 Structured Logging
+
+Centralized infrastructure log viewer.
 
 Features:
 
-* Job enqueueing
-* Worker pools
-* Retry logic
-* Delayed jobs
-* Priority queues
-* Dead Letter Queue (DLQ)
-* Worker crash/recovery simulation
-
-Queue flow:
-
-```text
-Producer → Queue → Worker → Retry → DLQ
-```
+- Live streaming
+- Severity filtering
+- Source filtering
+- Full-text search
+- Gateway logs
+- Cache logs
+- Worker logs
+- Queue logs
+- Pub/Sub logs
 
 ---
 
-## Realtime Observability Dashboards
+### 🔍 Distributed Tracing
 
-InfraMesh includes the 3 pillars of observability.
+Jaeger-inspired request tracing.
 
-### Metrics
+Each cache command generates a complete request trace.
 
-Live telemetry charts including:
+Visualization includes:
 
-* Requests/sec
-* P95 latency
-* Cache hit ratio
-* Queue depth
-* CPU usage
-* Memory usage
-
-### Logs
-
-Structured centralized logging system with:
-
-* Severity filtering
-* Search
-* Service-based logs
-* Live log streaming
-
-### Traces
-
-Jaeger-style distributed tracing with:
-
-* Waterfall timelines
-* Span visualization
-* Request IDs
-* Service latency analysis
+- Waterfall timeline
+- Service spans
+- Request IDs
+- Processing duration
+- Per-span latency
+- Success / failure states
 
 ---
 
-## Cluster Visualization
+### 🌐 Cluster Topology
 
-Interactive distributed topology visualizer.
+Interactive visualization of the distributed cache.
 
 Features:
 
-* Consistent hash ring
-* Node ownership
-* Replica relationships
-* Live node status
-* Failover simulation
-* Key placement visualization
+- Consistent hash ring
+- Primary nodes
+- Replica nodes
+- Replication links
+- Node ownership
+- Dynamic key placement
+- Zoom & pan
+- Node failure simulation
+
+Users can enter arbitrary keys and instantly see which shard owns them.
 
 ---
 
-## Node Health Monitoring
+### ❤️ Node Health Monitoring
 
-Infrastructure health dashboard featuring:
+Infrastructure monitoring dashboard.
 
-* Heartbeats
-* CPU usage
-* Memory pressure
-* Eviction tracking
-* Node lifecycle simulation
-* Chaos engineering controls
+Displays:
 
----
+- Heartbeats
+- CPU usage
+- Memory pressure
+- Cache statistics
+- Evictions
+- Node state
+- Replica information
 
-# Tech Stack
-
-## Frontend
-
-* React 19
-* TypeScript
-* TanStack Start
-* TanStack Router
-* TanStack Query
-* TailwindCSS
-* Recharts
-* Radix UI
-* Lucide React
-
-## Tooling
-
-* Vite
-* Bun
-* ESLint
-* Prettier
-
-## Deployment
-
-* Cloudflare Workers compatible
+Interactive controls allow nodes to be stopped and restarted in real time.
 
 ---
 
-# Architecture
+## 🏗️ Architecture
+
+InfraMesh is intentionally **not** built like a traditional CRUD application.
+
+Instead of:
 
 ```text
-                React Dashboard
-                        │
-                  TanStack Router
-                        │
-       ┌────────────────┼────────────────┐
-       │                │                │
-    Metrics          Queue           Tracing
-       │                │                │
-       └────────────────┼────────────────┘
-                        │
-                   useEngine()
-                        │
-                InfraMeshEngine
-                        │
- ┌──────────────┬───────┼────────┬──────────────┐
- │              │                │              │
-Cache         Queue            Logs          Traces
- │              │                │              │
-Replicas      Workers         Metrics       Spans
- │              │                │              │
-Pub/Sub       DLQ           Telemetry     Waterfalls
+Frontend
+      │
+      ▼
+ REST API
+      │
+      ▼
+ Database
 ```
+
+InfraMesh behaves like:
+
+```text
+              React UI
+                  │
+                  ▼
+          useSyncExternalStore
+                  │
+                  ▼
+         InfraMesh Simulation Engine
+                  │
+ ┌──────────────┬───────────────┬──────────────┐
+ │              │               │              │
+ ▼              ▼               ▼              ▼
+Cache        Queue          Metrics        Tracing
+ │              │               │              │
+ ▼              ▼               ▼              ▼
+Replicas     Workers         Logs         Observability
+```
+
+The engine owns the complete infrastructure state.
+
+React simply subscribes to state changes and renders different visualizations.
 
 ---
 
-# Project Structure
+# ⚡ Simulation Engine
+
+The heart of InfraMesh is:
+
+```text
+src/lib/inframesh/engine.ts
+```
+
+The engine models an entire distributed infrastructure inside browser memory.
+
+It manages:
+
+- Cache clusters
+- Queue orchestration
+- Worker scheduling
+- Metrics generation
+- Request tracing
+- Structured logging
+- Rate limiting
+- Node health
+- Replica synchronization
+- TTL expiration
+- LRU eviction
+- Pub/Sub messaging
+
+Every interaction flows through the engine before updating the UI.
+
+---
+
+## 🔄 Event-Driven Architecture
+
+State updates follow a unidirectional event-driven model.
+
+```text
+User Action
+      │
+      ▼
+ InfraMeshEngine
+      │
+      ▼
+   mutate state
+      │
+      ▼
+      emit()
+      │
+      ▼
+useSyncExternalStore
+      │
+      ▼
+ React Re-render
+      │
+      ▼
+ Updated Dashboard
+```
+
+This keeps the UI completely decoupled from the infrastructure simulation.
+
+---
+
+# 📂 Project Structure
 
 ```text
 src
+│
 ├── components
 │   ├── inframesh
 │   └── ui
@@ -217,17 +299,17 @@ src
 │   ├── inframesh
 │   │   ├── engine.ts
 │   │   └── useEngine.ts
-│   ├── error-page.ts
-│   └── utils.ts
+│   ├── utils.ts
+│   └── error-page.ts
 │
 ├── routes
 │   ├── index.tsx
 │   ├── cache.tsx
 │   ├── queue.tsx
+│   ├── cluster.tsx
 │   ├── metrics.tsx
 │   ├── logs.tsx
 │   ├── tracing.tsx
-│   ├── cluster.tsx
 │   └── health.tsx
 │
 ├── router.tsx
@@ -237,136 +319,152 @@ src
 
 ---
 
-# Core Engine
+# 🖥️ Application Routes
 
-The heart of InfraMesh is:
-
-```text
-src/lib/inframesh/engine.ts
-```
-
-This custom simulation engine maintains centralized in-memory distributed systems state.
-
-The engine simulates:
-
-* Distributed cache nodes
-* Queue orchestration
-* Worker processing
-* Metrics generation
-* Structured logs
-* Distributed tracing
-* Replication systems
-* Node heartbeats
-* Failover behavior
-
-The engine follows an event-driven reactive architecture.
+| Route | Description |
+|--------|-------------|
+| `/` | Live infrastructure overview |
+| `/cache` | Redis-inspired cache playground |
+| `/queue` | Queue & worker simulation |
+| `/cluster` | Cluster topology & consistent hashing |
+| `/metrics` | Live telemetry dashboard |
+| `/logs` | Structured log viewer |
+| `/tracing` | Distributed request tracing |
+| `/health` | Node health monitoring |
 
 ---
 
-# State Management
-
-InfraMesh uses a custom event-driven state system.
-
-Flow:
-
-```text
-Engine State
-     ↓
-emit()
-     ↓
-useSyncExternalStore
-     ↓
-React Re-render
-     ↓
-Realtime Dashboard Updates
-```
-
----
-
-# Routes
-
-| Route      | Purpose                            |
-| ---------- | ---------------------------------- |
-| `/`        | System overview dashboard          |
-| `/cache`   | Redis-style cache simulator        |
-| `/queue`   | Queue & worker orchestration       |
-| `/cluster` | Distributed topology visualization |
-| `/metrics` | Live telemetry charts              |
-| `/logs`    | Structured centralized logs        |
-| `/tracing` | Distributed request tracing        |
-| `/health`  | Node health & failover controls    |
-
----
-
-# Design Philosophy
-
-InfraMesh is not a traditional CRUD application.
-
-Instead of:
-
-```text
-Frontend → Backend API → Database
-```
-
-InfraMesh behaves like:
-
-```text
-Frontend UI
-      +
-Embedded Infrastructure Simulation Engine
-```
-
-The application acts like a realtime distributed systems sandbox running entirely in browser memory.
-
----
-
-# Distributed Systems Concepts Demonstrated
+# 🧠 Distributed Systems Concepts
 
 ## Caching
 
-* Consistent hashing
-* Replication
-* LRU eviction
-* TTL expiration
-* Key ownership
-
-## Queueing
-
-* Worker orchestration
-* Retries
-* Delayed jobs
-* Priorities
-* Dead Letter Queues
-
-## Observability
-
-* Metrics
-* Structured logs
-* Distributed tracing
-* Correlation IDs
-* Waterfall analysis
-
-## Reliability
-
-* Node health
-* Heartbeats
-* Failover
-* Chaos engineering
-* Recovery systems
+- Consistent Hashing
+- LRU Eviction
+- TTL Expiration
+- Replication
+- Primary / Replica Topology
+- Cache Hits & Misses
 
 ---
 
-# Running Locally
+## Queueing
 
-## Install Dependencies
+- Producer / Consumer
+- Worker Pools
+- Priorities
+- Delayed Jobs
+- Retries
+- Dead Letter Queue
+- Worker Recovery
 
-Using Bun:
+---
+
+## Observability
+
+- Metrics
+- Structured Logs
+- Distributed Traces
+- Correlation IDs
+- Waterfall Analysis
+
+---
+
+## Reliability
+
+- Heartbeats
+- Node Failure
+- Recovery
+- Rate Limiting
+- Resource Monitoring
+
+---
+
+# 🎨 UI Design
+
+The interface is inspired by modern infrastructure dashboards.
+
+Design influences include:
+
+- Grafana
+- Datadog
+- Jaeger
+- RedisInsight
+- Kubernetes Dashboard
+
+Visual characteristics:
+
+- Glassmorphism
+- Dark theme
+- Neon accent colors
+- Live telemetry
+- Animated infrastructure visuals
+- Monospace terminal aesthetics
+- Interactive topology diagrams
+
+---
+
+# 🛠️ Tech Stack
+
+## Frontend
+
+- React 19
+- TypeScript
+- TanStack Start
+- TanStack Router
+- TanStack Query
+- Tailwind CSS v4
+- Recharts
+- Radix UI
+- Lucide React
+
+---
+
+## State Management
+
+- Custom Event Bus
+- useSyncExternalStore
+- Singleton Simulation Engine
+
+---
+
+## Tooling
+
+- Vite
+- Bun
+- ESLint
+- Prettier
+
+---
+
+## Deployment
+
+Compatible with:
+
+- Cloudflare Workers
+
+---
+
+# 🚀 Getting Started
+
+## Clone the repository
+
+```bash
+git clone https://github.com/<your-username>/InfraMesh.git
+
+cd InfraMesh
+```
+
+---
+
+## Install dependencies
+
+Using Bun
 
 ```bash
 bun install
 ```
 
-Or npm:
+or npm
 
 ```bash
 npm install
@@ -374,13 +472,13 @@ npm install
 
 ---
 
-## Start Development Server
+## Start development server
 
 ```bash
 bun run dev
 ```
 
-Or:
+or
 
 ```bash
 npm run dev
@@ -388,13 +486,13 @@ npm run dev
 
 ---
 
-## Build for Production
+## Production build
 
 ```bash
 bun run build
 ```
 
-Or:
+or
 
 ```bash
 npm run build
@@ -402,73 +500,70 @@ npm run build
 
 ---
 
-# UI & Design
+# 💡 Why InfraMesh?
 
-InfraMesh uses a futuristic observability aesthetic inspired by:
+Most portfolio projects demonstrate CRUD operations.
 
-* Grafana
-* Datadog
-* RedisInsight
-* Jaeger
-* Kubernetes dashboards
+InfraMesh explores an entirely different problem space.
 
-Visual style includes:
+It focuses on:
 
-* Dark glassmorphism UI
-* Neon cyan/violet accents
-* Animated telemetry
-* Cyberpunk observability design
-* Monospace infrastructure visuals
+- Distributed systems
+- Infrastructure visualization
+- Event-driven architecture
+- State synchronization
+- Observability
+- Interactive learning
 
----
-
-# Why This Project Exists
-
-InfraMesh was built to:
-
-* Explore distributed systems visually
-* Learn observability concepts interactively
-* Simulate infrastructure behavior in realtime
-* Demonstrate advanced frontend architecture
-* Create a portfolio-grade systems engineering project
+Instead of consuming backend APIs, InfraMesh embeds an infrastructure simulation engine directly into the frontend, allowing users to experiment with distributed systems concepts in real time.
 
 ---
 
-# Future Improvements
+# 🚧 Future Improvements
 
-Potential future enhancements:
+Potential enhancements include:
 
-* WebSocket-based realtime sync
-* Multi-user collaborative clusters
-* Kubernetes simulation
-* API gateway rate limiting
-* Persistent telemetry storage
-* OpenTelemetry integration
-* Alerting system
-* Dockerized backend mode
-
----
-
-# Inspiration
-
-InfraMesh draws inspiration from:
-
-* Redis
-* Kafka
-* Grafana
-* Datadog
-* Jaeger
-* OpenTelemetry
-* Kubernetes dashboards
+- Kubernetes cluster simulation
+- Service discovery
+- API Gateway
+- Circuit breakers
+- Distributed locks
+- Gossip protocol
+- Leader election
+- Network partition simulation
+- Multi-user collaborative clusters
+- OpenTelemetry export
+- Persistent telemetry storage
+- Alert manager
+- WebSocket synchronization
 
 ---
 
-# Author
+# 📚 Inspiration
 
-Built by Ashish.
+InfraMesh is inspired by the architecture and tooling used in modern distributed systems, including:
+
+- Redis
+- Kafka
+- RabbitMQ
+- Grafana
+- Datadog
+- Jaeger
+- OpenTelemetry
+- Kubernetes
+
+The project does **not** reimplement these systems. Instead, it provides an educational simulation of many of the concepts they employ.
 
 ---
 
-# License
+# 👨‍💻 Author
 
-MIT License
+**Ashish**
+
+GitHub: **Ashishworks**
+
+---
+
+# 📄 License
+
+This project is licensed under the **MIT License**.
