@@ -40,13 +40,13 @@ function HealthPage() {
       </style>
 
       {/* Page Header with Glass Container Wrapper */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <div className="absolute inset-0 glass-card-shine pointer-events-none" />
-        <PageHeader
-          title="Node Health"
-          subtitle="Per-node heartbeats, resource usage, and failover simulation controls."
-        />
-      </div>
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] py-4 px-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div className="absolute inset-0 glass-card-shine pointer-events-none" />
+  <PageHeader
+    title="Node Health"
+    subtitle="Per-node heartbeats, resource usage, and failover simulation controls."
+  />
+</div>  
 
       <div className="space-y-4">
         <SectionHeader title="Cluster nodes" description="Real-time instance telemetry and status" />

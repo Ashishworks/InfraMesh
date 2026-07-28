@@ -105,13 +105,13 @@ function ClusterPage() {
       </style>
 
       {/* Page Header with Glass Container Wrapper */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <div className="absolute inset-0 glass-card-shine pointer-events-none" />
-        <PageHeader
-          title="Cluster Topology"
-          subtitle="Sharded primaries with paired replicas. Scroll to zoom, drag to pan. Click a node to simulate failure."
-        />
-      </div>
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] py-4 px-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div className="absolute inset-0 glass-card-shine pointer-events-none" />
+  <PageHeader
+    title="Cluster Topology"
+    subtitle="Sharded primaries with paired replicas. Scroll to zoom, drag to pan. Click a node to simulate failure."
+  />
+</div>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr] items-start">
         {/* Hash ring Panel */}

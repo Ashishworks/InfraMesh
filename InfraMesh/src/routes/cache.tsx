@@ -71,13 +71,13 @@ function CachePage() {
       </style>
 
       {/* Page Header with Glass Container Wrapper */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <div className="absolute inset-0 glass-card-shine pointer-events-none" />
-        <PageHeader
-          title="Cache Playground"
-          subtitle="Redis-inspired sharded cache. Commands route via consistent hashing to primaries and replicate to replicas."
-        />
-      </div>
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] py-4 px-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div className="absolute inset-0 glass-card-shine pointer-events-none" />
+  <PageHeader
+    title="Cache Playground"
+    subtitle="Redis-inspired sharded cache. Commands route via consistent hashing to primaries and replicate to replicas."
+  />
+</div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Terminal Panel - Height reduced to h-[250px] */}

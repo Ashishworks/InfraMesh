@@ -55,13 +55,13 @@ function LogsPage() {
       </style>
 
       {/* Page Header with Glass Container Wrapper */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <div className="absolute inset-0 glass-card-shine pointer-events-none" />
-        <PageHeader
-          title="Live Logs"
-          subtitle="Structured logs streamed from gateway, cache nodes, and workers."
-        />
-      </div>
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] py-4 px-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div className="absolute inset-0 glass-card-shine pointer-events-none" />
+  <PageHeader
+    title="Live Logs"
+    subtitle="Structured logs streamed from gateway, cache nodes, and workers."
+  />
+</div>
 
       <div className="group relative rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-2xl shadow-xl transition-all duration-300 hover:border-red-500/30 hover:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
         <Panel

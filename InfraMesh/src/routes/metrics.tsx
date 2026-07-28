@@ -54,13 +54,13 @@ function MetricsPage() {
       </style>
 
       {/* Page Header with Glass Container Wrapper */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <div className="absolute inset-0 glass-card-shine pointer-events-none" />
-        <PageHeader
-          title="Metrics"
-          subtitle="60-second rolling window aggregated from gateway, cache, and workers."
-        />
-      </div>
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] py-4 px-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div className="absolute inset-0 glass-card-shine pointer-events-none" />
+  <PageHeader
+    title="Metrics"
+    subtitle="60-second rolling window aggregated from gateway, cache, and workers."
+  />
+</div>
 
       <div className="space-y-4">
         <SectionHeader title="Performance telemetry" description="Live real-time streaming metrics" />

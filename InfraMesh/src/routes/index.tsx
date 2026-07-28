@@ -55,14 +55,15 @@ function Overview() {
       </style>
 
       {/* Page Header with Glass Container Wrapper */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+      {/* Changed p-6 to py-4 px-6 to reduce top/bottom padding while keeping horizontal spacing */}
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] py-4 px-6 backdrop-blur-xl shadow-2xl overflow-hidden">
         <div className="absolute inset-0 glass-card-shine pointer-events-none" />
         <PageHeader
           title="Cluster Overview"
           subtitle="Real-time view of every InfraMesh subsystem — throughput, cache, queues, and node health."
           actions={
-            <button 
-              onClick={() => e.reset()} 
+            <button
+              onClick={() => e.reset()}
               className="group flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-950/20 px-4 py-2 text-xs font-semibold text-red-50 backdrop-blur-md transition-all duration-300 hover:bg-red-900/30 hover:border-red-500/60 active:scale-95 shadow-[0_4px_12px_rgba(239,68,68,0.15)]"
             >
               <RotateCcw className="h-3.5 w-3.5 transition-transform duration-500 group-hover:-rotate-180 text-red-400" />
@@ -76,28 +77,28 @@ function Overview() {
         <SectionHeader title="Key metrics" description="Live aggregates across the simulated cluster" />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="transition-all duration-300 hover:-translate-y-1">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
             <StatCard label="Requests / sec" value={fmt(last?.rps ?? 0, 1)} sub={`${fmt(totals.req)} total · ${fmt(totals.err)} errors`} accent="primary" icon={<Activity className="w-4 h-4 text-red-400" />} />
           </div>
-          <div className="transition-all duration-300 hover:-translate-y-1">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
             <StatCard label="Cache hit ratio" value={`${fmt(hitRatio * 100, 1)}%`} sub={`${fmt(totals.cacheHits)} hits · ${fmt(totals.cacheMisses)} misses`} accent="success" icon={<Database className="w-4 h-4 text-emerald-400" />} />
           </div>
-          <div className="transition-all duration-300 hover:-translate-y-1">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
             <StatCard label="Queue depth" value={fmt(qDepth)} sub={`${e.state.dlq.length} in dead letter queue`} accent="warning" icon={<Inbox className="w-4 h-4 text-amber-400" />} />
           </div>
-          <div className="transition-all duration-300 hover:-translate-y-1">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
             <StatCard label="Active nodes" value={`${aliveNodes}/${e.state.nodes.length}`} sub={`${aliveWorkers}/${e.state.workers.length} workers online`} accent="info" icon={<Network className="w-4 h-4 text-sky-400" />} />
           </div>
-          <div className="transition-all duration-300 hover:-translate-y-1">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
             <StatCard label="P95 latency" value={`${fmt(last?.latencyP95 ?? 0, 1)} ms`} accent="info" icon={<Zap className="w-4 h-4 text-sky-400" />} />
           </div>
-          <div className="transition-all duration-300 hover:-translate-y-1">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
             <StatCard label="CPU average" value={`${fmt((last?.cpu ?? 0) * 100, 0)}%`} accent="warning" icon={<Cpu className="w-4 h-4 text-amber-400" />} />
           </div>
-          <div className="transition-all duration-300 hover:-translate-y-1">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
             <StatCard label="Memory" value={`${fmt(memBytes / 1024, 1)} KB`} sub="Across all primaries" accent="accent" icon={<HardDrive className="w-4 h-4 text-purple-400" />} />
           </div>
-          <div className="transition-all duration-300 hover:-translate-y-1">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
             <StatCard label="Replication" value="Healthy" sub={`${e.state.nodes.filter(n => n.role === "replica" && n.alive).length} replicas in sync`} accent="success" icon={<Workflow className="w-4 h-4 text-emerald-400" />} />
           </div>
         </div>
@@ -134,10 +135,10 @@ function ChartCard({ title, unit, data, dataKey, color }: { title: string; unit:
                 <XAxis dataKey="i" hide />
                 <YAxis stroke="rgba(255, 255, 255, 0.3)" fontSize={10} width={36} tickLine={false} axisLine={false} />
                 <Tooltip
-                  contentStyle={{ 
-                    background: "rgba(0, 0, 0, 0.8)", 
-                    border: "1px solid rgba(255, 255, 255, 0.1)", 
-                    borderRadius: "12px", 
+                  contentStyle={{
+                    background: "rgba(0, 0, 0, 0.8)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    borderRadius: "12px",
                     fontSize: "12px",
                     backdropFilter: "blur(12px)",
                     boxShadow: "0 10px 25px rgba(0,0,0,0.5)"
@@ -145,12 +146,12 @@ function ChartCard({ title, unit, data, dataKey, color }: { title: string; unit:
                   labelStyle={{ color: "rgba(255, 255, 255, 0.7)" }}
                   itemStyle={{ color: "#fff", fontWeight: 600 }}
                 />
-                <Area 
-                  type="monotone" 
-                  dataKey={dataKey} 
-                  stroke={color} 
-                  strokeWidth={2.5} 
-                  fill={`url(#g-${dataKey})`} 
+                <Area
+                  type="monotone"
+                  dataKey={dataKey}
+                  stroke={color}
+                  strokeWidth={2.5}
+                  fill={`url(#g-${dataKey})`}
                   activeDot={{ r: 5, stroke: "#fff", strokeWidth: 2, fill: color }}
                 />
               </AreaChart>

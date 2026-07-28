@@ -8,8 +8,9 @@ import {
   ScrollText,
   Workflow,
   HeartPulse,
-  Waypoints,
 } from "lucide-react";
+// Import your new AnimatedIcon component here
+import { AnimatedIcon } from "@/components/inframesh/AnimatedIcon";
 
 const navGroups = [
   {
@@ -49,18 +50,25 @@ export function Sidebar() {
       {/* Brand Header */}
       <div className="px-6 py-7 animate-in fade-in slide-in-from-top-4 duration-500">
         <Link to="/" className="flex items-center gap-3 group active:scale-95 transition-transform">
-          <div className="grid place-items-center h-10 w-10 rounded-xl border border-red-900/50 bg-red-950/30 shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all duration-300 group-hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] group-hover:border-red-500/60">
-            <Waypoints className="h-[20px] w-[20px] text-red-500 transition-transform duration-500 group-hover:rotate-180 group-hover:scale-110" />
-          </div>
-          <div>
-            <div className="text-[16px] font-bold tracking-tight text-foreground transition-colors group-hover:text-red-50">
-              InfraMesh
-            </div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-500/70">
-              Control Plane
-            </div>
-          </div>
-        </Link>
+  {/* INCREASED box size from h-10 w-10 to h-12 w-12 */}
+  <div className="grid place-items-center h-12 w-12 rounded-xl border border-red-900/50 bg-red-950/30 shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all duration-300 group-hover:shadow-[0_0_25px_rgba(239,68,68,0.3)] group-hover:border-red-500/60">
+    
+    {/* INCREASED icon size and added speed={1.5} */}
+    <AnimatedIcon 
+      speed={2} 
+      className="h-[32px] w-[32px] text-red-500 transition-transform duration-500 group-hover:rotate-180 group-hover:scale-110" 
+    />
+    
+  </div>
+  <div>
+    <div className="text-[16px] font-bold tracking-tight text-foreground transition-colors group-hover:text-red-50">
+      InfraMesh
+    </div>
+    <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-red-500/70">
+      Control Plane
+    </div>
+  </div>
+</Link>
       </div>
 
       {/* Navigation Links with Staggered Animation */}

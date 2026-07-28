@@ -41,13 +41,13 @@ function TracingPage() {
       </style>
 
       {/* Page Header with Glass Container Wrapper */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
-        <div className="absolute inset-0 glass-card-shine pointer-events-none" />
-        <PageHeader
-          title="Request Tracing"
-          subtitle="Distributed trace waterfall for commands flowing through the cluster."
-        />
-      </div>
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] py-4 px-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+  <div className="absolute inset-0 glass-card-shine pointer-events-none" />
+  <PageHeader
+    title="Request Tracing"
+    subtitle="Distributed trace waterfall for commands flowing through the cluster."
+  />
+</div>
 
       <div className="grid gap-6 lg:grid-cols-[320px_1fr] items-start">
         {/* Recent Traces Panel */}
