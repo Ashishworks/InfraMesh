@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEngine } from "@/lib/inframesh/useEngine";
 import { PageHeader } from "@/components/inframesh/PageHeader";
 import { Panel } from "@/components/inframesh/Panel";
-import { useState, WheelEvent, PointerEvent, FormEvent } from "react";
+import { useState, useRef, useEffect, PointerEvent, FormEvent } from "react";
+import { Network, Send, RefreshCw } from "lucide-react";
 
 export const Route = createFileRoute("/cluster")({
   head: () => ({
@@ -32,14 +33,31 @@ function ClusterPage() {
   const [customKeys, setCustomKeys] = useState<string[]>(initialSamples);
   const [inputValue, setInputValue] = useState("");
 
-  // Handlers for Zoom & Pan
-  const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
-    setZoom((prev) => {
-      const newZoom = prev - event.deltaY * 0.0015;
-      return Math.min(Math.max(0.5, newZoom), 3);
-    });
-  };
+  // 1. Create a ref for the container
+  const ringRef = useRef<HTMLDivElement>(null);
 
+  // 2. Attach a non-passive wheel event listener to prevent page scroll
+  useEffect(() => {
+    const el = ringRef.current;
+    if (!el) return;
+
+    const handleNativeWheel = (event: WheelEvent) => {
+      event.preventDefault(); // Prevents the whole page from scrolling
+      setZoom((prev) => {
+        const newZoom = prev - event.deltaY * 0.0015;
+        return Math.min(Math.max(0.5, newZoom), 3);
+      });
+    };
+
+    // { passive: false } allows preventDefault to work
+    el.addEventListener("wheel", handleNativeWheel, { passive: false });
+    
+    return () => {
+      el.removeEventListener("wheel", handleNativeWheel);
+    };
+  }, []);
+
+  // Handlers for Pan
   const handlePointerDown = () => setIsDragging(true);
   
   const handlePointerMove = (event: PointerEvent<SVGSVGElement>) => {
@@ -60,22 +78,58 @@ function ClusterPage() {
     event.preventDefault();
     const trimmed = inputValue.trim();
     if (trimmed && !customKeys.includes(trimmed)) {
-      // Add the new key to the top of the list
       setCustomKeys((prev) => [trimmed, ...prev]);
       setInputValue("");
     }
   };
 
   return (
-    <div className="animate-fade-in">
-      <PageHeader
-        title="Cluster Topology"
-        subtitle="Sharded primaries with paired replicas. Scroll to zoom, drag to pan. Click a node to simulate failure."
-      />
+    <div className="animate-fade-in space-y-8 pb-10">
+      {/* CSS for Glass Shimmer / Highlights */}
+      <style>
+        {`
+          @keyframes card-shine {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+          }
+          .glass-card-shine {
+            background: linear-gradient(90deg, 
+              rgba(255, 255, 255, 0) 45%, 
+              rgba(255, 255, 255, 0.05) 50%, 
+              rgba(255, 255, 255, 0) 55%
+            );
+            background-size: 200% auto;
+            animation: card-shine 4s linear infinite;
+          }
+        `}
+      </style>
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <Panel title="Hash ring" description="Drag to look around, release to snap back" noPadding>
-          <div className="px-4 pb-4 overflow-hidden" onWheel={handleWheel}>
+      {/* Page Header with Glass Container Wrapper */}
+      <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-6 backdrop-blur-xl shadow-2xl overflow-hidden">
+        <div className="absolute inset-0 glass-card-shine pointer-events-none" />
+        <PageHeader
+          title="Cluster Topology"
+          subtitle="Sharded primaries with paired replicas. Scroll to zoom, drag to pan. Click a node to simulate failure."
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr] items-start">
+        {/* Hash ring Panel */}
+        <div className="group relative rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-2xl shadow-xl transition-all duration-300 hover:border-red-500/30 hover:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="text-sm font-semibold text-foreground tracking-wide">Hash ring</div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-red-400/80">Drag to look around, release to snap back</div>
+            </div>
+            <div className="rounded-full border border-red-500/30 bg-red-950/20 px-2.5 py-0.5 text-[10px] font-semibold text-red-300 font-mono">
+              Topology
+            </div>
+          </div>
+
+          <div 
+            ref={ringRef}
+            className="overflow-hidden bg-black/40 rounded-xl p-3 border border-white/5 shadow-inner"
+          >
             <svg 
               viewBox={`-40 -60 ${W + 80} ${H + 120}`} 
               className="h-[400px] w-full"
@@ -87,8 +141,8 @@ function ClusterPage() {
             >
               <defs>
                 <radialGradient id="ring" cx="50%" cy="50%" r="50%">
-                  <stop offset="60%" stopColor="oklch(0.60 0.22 25 / 0)" />
-                  <stop offset="100%" stopColor="oklch(0.60 0.22 25 / 0.15)" />
+                  <stop offset="60%" stopColor="#ef4444" stopOpacity={0} />
+                  <stop offset="100%" stopColor="#ef4444" stopOpacity={0.15} />
                 </radialGradient>
               </defs>
               
@@ -129,7 +183,7 @@ function ClusterPage() {
                 }}
               >
                 <circle cx={cx} cy={cy} r={R} fill="none" stroke="url(#ring)" strokeWidth="28" className="transition-colors duration-500" />
-                <circle cx={cx} cy={cy} r={R} fill="none" stroke="oklch(0.60 0.22 25 / 0.25)" strokeDasharray="2 6" />
+                <circle cx={cx} cy={cy} r={R} fill="none" stroke="rgba(239, 68, 68, 0.25)" strokeDasharray="2 6" />
                 
                 {primaries.map((n, i) => {
                   const angle = (i / primaries.length) * Math.PI * 2 - Math.PI / 2;
@@ -145,7 +199,7 @@ function ClusterPage() {
                       {replica && (
                         <line 
                           x1={x} y1={y} x2={rx} y2={ry}
-                          stroke={linkActive ? "oklch(0.60 0.22 25 / 0.7)" : "oklch(0.35 0.02 25 / 0.3)"}
+                          stroke={linkActive ? "rgba(239, 68, 68, 0.7)" : "rgba(255, 255, 255, 0.1)"}
                           strokeWidth="2" 
                           className={`transition-colors duration-300 ${linkActive ? 'animate-flow' : ''}`} 
                         />
@@ -157,45 +211,59 @@ function ClusterPage() {
                     </g>
                   );
                 })}
-                <text x={cx} y={cy - 4} textAnchor="middle" fill="oklch(0.50 0.15 25)" fontSize="11">consistent-hash ring</text>
-                <text x={cx} y={cy + 14} textAnchor="middle" fill="oklch(0.60 0.22 25)" fontSize="20" fontWeight="600" fontFamily="ui-monospace">
+                <text x={cx} y={cy - 4} textAnchor="middle" fill="rgba(255, 255, 255, 0.5)" fontSize="11">consistent-hash ring</text>
+                <text x={cx} y={cy + 14} textAnchor="middle" fill="#ef4444" fontSize="20" fontWeight="600" fontFamily="ui-monospace">
                   {primaries.filter(p => p.alive).length}/{primaries.length}
                 </text>
               </g>
             </svg>
-            <p className="text-center text-xs text-muted-foreground mt-2">
+            <p className="text-center text-xs text-muted-foreground/80 mt-3 font-mono">
               Keys re-route automatically to surviving primaries on failure
             </p>
           </div>
-        </Panel>
+        </div>
 
-        <Panel title="Shard placement" description="Test how custom keys route" noPadding>
-          <div className="flex flex-col h-[450px]">
+        {/* Shard placement Panel */}
+        <div className="group relative rounded-2xl border border-white/10 bg-white/[0.02] p-5 backdrop-blur-2xl shadow-xl transition-all duration-300 hover:border-red-500/30 hover:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="text-sm font-semibold text-foreground tracking-wide">Shard placement</div>
+              <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-red-400/80">Test how custom keys route</div>
+            </div>
+            <div className="rounded-full border border-red-500/30 bg-red-950/20 px-2.5 py-0.5 text-[10px] font-semibold text-red-300 font-mono">
+              Router
+            </div>
+          </div>
+
+          <div className="space-y-4">
             {/* Dynamic Input Form */}
-            <form onSubmit={handleAddKey} className="p-4 border-b border-border/30 flex gap-2">
+            <form onSubmit={handleAddKey} className="flex gap-2">
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Test a key (e.g. user:500)..."
-                className="flex-1 bg-transparent border border-border/50 rounded-md px-3 py-1.5 text-xs text-foreground focus:outline-none focus:border-red-500/70 transition-colors"
+                className="flex-1 rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs font-mono text-foreground backdrop-blur-md outline-none transition-colors focus:border-red-500/50 shadow-inner placeholder:text-muted-foreground/40"
               />
               <button 
                 type="submit" 
-                className="bg-red-950/40 hover:bg-red-900/60 text-red-200/90 border border-red-900/50 px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                className="group/btn flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-950/20 px-3.5 py-2 text-xs font-semibold text-red-50 backdrop-blur-md transition-all duration-300 hover:bg-red-900/30 hover:border-red-500/60 active:scale-95 shadow-[0_4px_12px_rgba(239,68,68,0.15)]"
               >
+                <Send className="h-3 w-3 text-red-400 transition-transform duration-300 group-hover/btn:translate-x-0.5" />
                 Route
               </button>
             </form>
 
-            {/* Dynamic Scroll Area */}
-            <div className="scroll-area flex-1 px-5 pb-4 overflow-y-auto">
+            {/* Dynamic Scroll Area with Fixed Height matching Hash Ring */}
+            <div className="scroll-area h-[356px] overflow-y-auto space-y-1.5 pr-1 bg-black/40 rounded-xl p-3 border border-white/5 shadow-inner">
               {customKeys.map((k) => {
                 const node = e.nodeForKey(k);
                 return (
-                  <div key={k} className="flex justify-between border-b border-border/30 py-3 font-mono text-[11px] last:border-0 group animate-fade-in">
-                    <span className="text-foreground/70 transition-colors group-hover:text-foreground">{k}</span>
-                    <span className={`transition-colors duration-300 ${node ? "font-medium text-red-500" : "text-destructive"}`}>
+                  <div key={k} className="flex items-center justify-between rounded-lg border border-white/5 bg-black/20 px-3 py-2 font-mono text-[11px] backdrop-blur-sm transition-colors hover:border-red-500/20 animate-fade-in">
+                    <span className="text-foreground/80 font-medium truncate">{k}</span>
+                    <span className={`transition-colors duration-300 rounded px-2 py-0.5 text-[10px] font-semibold border ${
+                      node ? "bg-red-950/20 text-red-400 border-red-500/30" : "bg-neutral-900 text-neutral-500 border-white/5"
+                    }`}>
                       {node?.id ?? "unavailable"}
                     </span>
                   </div>
@@ -203,7 +271,7 @@ function ClusterPage() {
               })}
             </div>
           </div>
-        </Panel>
+        </div>
       </div>
     </div>
   );
@@ -213,9 +281,9 @@ function NodeDot({ x, y, label, alive, role, onClick }: { x: number; y: number; 
   const isPrimary = role === "primary";
   const [ripples, setRipples] = useState<number[]>([]);
   
-  const colorOffline = "oklch(0.35 0.02 25)"; 
-  const colorPrimary = "oklch(0.60 0.22 25)"; 
-  const colorReplica = "oklch(0.50 0.15 25)"; 
+  const colorOffline = "#525252"; 
+  const colorPrimary = "#ef4444"; 
+  const colorReplica = "#f87171"; 
   
   const color = !alive ? colorOffline : isPrimary ? colorPrimary : colorReplica;
 
@@ -261,7 +329,7 @@ function NodeDot({ x, y, label, alive, role, onClick }: { x: number; y: number; 
       <text 
         x={x} y={y + (isPrimary ? 32 : 24)} 
         textAnchor="middle" 
-        fill={alive ? "oklch(0.85 0.05 25)" : "oklch(0.45 0.02 25)"} 
+        fill={alive ? "#e5e5e5" : "#737373"} 
         fontSize="11" 
         fontWeight={alive ? "600" : "400"}
         fontFamily="ui-monospace"
