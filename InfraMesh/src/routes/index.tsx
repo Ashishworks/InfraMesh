@@ -55,7 +55,6 @@ function Overview() {
       </style>
 
       {/* Page Header with Glass Container Wrapper */}
-      {/* Changed p-6 to py-4 px-6 to reduce top/bottom padding while keeping horizontal spacing */}
       <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] py-4 px-6 backdrop-blur-xl shadow-2xl overflow-hidden">
         <div className="absolute inset-0 glass-card-shine pointer-events-none" />
         <PageHeader
@@ -77,28 +76,29 @@ function Overview() {
         <SectionHeader title="Key metrics" description="Live aggregates across the simulated cluster" />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
+          {/* Added hover:[&>*]:border-red-500/30 and hover:[&>*]:shadow-... to elegantly style the child component without adding a new border wrapper */}
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full [&>*]:transition-all hover:[&>*]:border-red-500/30 hover:[&>*]:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
             <StatCard label="Requests / sec" value={fmt(last?.rps ?? 0, 1)} sub={`${fmt(totals.req)} total · ${fmt(totals.err)} errors`} accent="primary" icon={<Activity className="w-4 h-4 text-red-400" />} />
           </div>
-          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full [&>*]:transition-all hover:[&>*]:border-red-500/30 hover:[&>*]:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
             <StatCard label="Cache hit ratio" value={`${fmt(hitRatio * 100, 1)}%`} sub={`${fmt(totals.cacheHits)} hits · ${fmt(totals.cacheMisses)} misses`} accent="success" icon={<Database className="w-4 h-4 text-emerald-400" />} />
           </div>
-          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full [&>*]:transition-all hover:[&>*]:border-red-500/30 hover:[&>*]:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
             <StatCard label="Queue depth" value={fmt(qDepth)} sub={`${e.state.dlq.length} in dead letter queue`} accent="warning" icon={<Inbox className="w-4 h-4 text-amber-400" />} />
           </div>
-          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full [&>*]:transition-all hover:[&>*]:border-red-500/30 hover:[&>*]:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
             <StatCard label="Active nodes" value={`${aliveNodes}/${e.state.nodes.length}`} sub={`${aliveWorkers}/${e.state.workers.length} workers online`} accent="info" icon={<Network className="w-4 h-4 text-sky-400" />} />
           </div>
-          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full [&>*]:transition-all hover:[&>*]:border-red-500/30 hover:[&>*]:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
             <StatCard label="P95 latency" value={`${fmt(last?.latencyP95 ?? 0, 1)} ms`} accent="info" icon={<Zap className="w-4 h-4 text-sky-400" />} />
           </div>
-          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full [&>*]:transition-all hover:[&>*]:border-red-500/30 hover:[&>*]:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
             <StatCard label="CPU average" value={`${fmt((last?.cpu ?? 0) * 100, 0)}%`} accent="warning" icon={<Cpu className="w-4 h-4 text-amber-400" />} />
           </div>
-          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full [&>*]:transition-all hover:[&>*]:border-red-500/30 hover:[&>*]:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
             <StatCard label="Memory" value={`${fmt(memBytes / 1024, 1)} KB`} sub="Across all primaries" accent="accent" icon={<HardDrive className="w-4 h-4 text-purple-400" />} />
           </div>
-          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full">
+          <div className="h-full transition-all duration-300 hover:-translate-y-1 [&>*]:h-full [&>*]:transition-all hover:[&>*]:border-red-500/30 hover:[&>*]:shadow-[0_8px_30px_rgba(239,68,68,0.08)]">
             <StatCard label="Replication" value="Healthy" sub={`${e.state.nodes.filter(n => n.role === "replica" && n.alive).length} replicas in sync`} accent="success" icon={<Workflow className="w-4 h-4 text-emerald-400" />} />
           </div>
         </div>
